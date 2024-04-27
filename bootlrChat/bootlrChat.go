@@ -24,9 +24,14 @@ type MessageHistoryItem struct {
 }
 
 type OpenAIRequest struct {
-    Model       string   							`json:"model"`
-    Messages    []MessageHistoryItem  `json:"messages"`
-    Temperature float64  							`json:"temperature"`
+    Model       		string   							`json:"model"`
+    Messages    		[]MessageHistoryItem  `json:"messages"`
+    Temperature 		float64  							`json:"temperature"`
+		Response_format Response_format				`json:"response_format"`
+}
+
+type Response_format struct {
+	Type string `json:"type"`
 }
 
 type OpenAIResponse struct {
@@ -90,7 +95,10 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 			Model:       "gpt-3.5-turbo",
 			Messages:    messageHistory,
 			Temperature: 0.7,
+			Response_format: Response_format{ Type : "json_object"},
 	}
+
+	fmt.Println("CHAT RESPONSE DATA ----> ", openAiRequestBody)
 
 	openAiRequestBodyBytes, err := json.Marshal(openAiRequestBody)
 	if err != nil {
@@ -119,7 +127,6 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	}
 
 	fmt.Println("CHAT RESPONSE DATA ----> ", string(responseData))
-	fmt.Println("SECRET EXISTS? ----> ", secrets.OPENAI_KEY)
 	
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(responseData, &openAIResponse); err != nil {
