@@ -24,13 +24,13 @@ type MessageHistoryItem struct {
 }
 
 type OpenAIRequest struct {
-    Model       		string   							`json:"model"`
-    Messages    		[]MessageHistoryItem  `json:"messages"`
-    Temperature 		float64  							`json:"temperature"`
-		Response_format Response_format				`json:"response_format"`
+    Model       		string   									`json:"model"`
+    Messages    		[]MessageHistoryItem  		`json:"messages"`
+    Temperature 		float64  									`json:"temperature"`
+		Response_format OpenaiResponseformat			`json:"response_format"`
 }
 
-type Response_format struct {
+type OpenaiResponseformat struct {
 	Type string `json:"type"`
 }
 
@@ -95,7 +95,7 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 			Model:       "gpt-3.5-turbo",
 			Messages:    messageHistory,
 			Temperature: 0.7,
-			Response_format: Response_format{ Type : "json_object"},
+			Response_format: OpenaiResponseformat{ Type : "json_object"},
 	}
 
 	openAiRequestBodyBytes, err := json.Marshal(openAiRequestBody)

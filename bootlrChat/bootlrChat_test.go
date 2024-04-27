@@ -1,4 +1,4 @@
-package bootlrSearch
+package bootlrChat
 
 import (
 	"encoding/json"
@@ -15,10 +15,10 @@ import (
 
 func TestBootlrSearch(t *testing.T) {
 	// Mocking the request body
-	requestBody := `{"messages":[{"role":"system","content":"sys_message1"}, {"role":"system","content":"sys_message2"}]}`
+	requestBody := `{"messages":[{"role":"system","content":"sys_message1"}, {"role":"user","content":"user_message2"}]}`
 
 	// Mocking the request
-	req, err := http.NewRequest("POST", "/bootlr-search", strings.NewReader(requestBody))
+	req, err := http.NewRequest("POST", "/bootlr-chat", strings.NewReader(requestBody))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,11 +29,9 @@ func TestBootlrSearch(t *testing.T) {
 	// Mocking the mocker
 	mocker := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Mocking the response
-		response := SearchResponse{
-			SearchQuery:     "search_query",
-			ShoppingResults: []interface{}{
-				map[string]interface{}{"product1": "product1_of_many"},
-			},
+		response := ChatResponse{
+			ResponseText:     "chat_response_text",
+			ProductReference: []string{"product1", "product2", "product3", "product4"},
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
@@ -48,21 +46,21 @@ func TestBootlrSearch(t *testing.T) {
 	}
 
 	// Decode the response body
-	var response SearchResponse
+	var response ChatResponse
 	err = json.NewDecoder(resRecorder.Body).Decode(&response)
 	if err != nil {
 		t.Errorf("error decoding response body: %v", err)
 	}
 
 	// Check the content of the response
-	expectedQuery := "search_query"
-	if response.SearchQuery != expectedQuery {
-		t.Errorf("unexpected search query: got %v want %v", response.SearchQuery, expectedQuery)
+	expectedResponseText := "chat_response_text"
+	if response.ResponseText != expectedResponseText {
+		t.Errorf("unexpected search query: got %v want %v", response.ResponseText, expectedResponseText)
 	}
 	
-	shoppingResults := response.ShoppingResults
-	expectedProduct := "product1_of_many"
-	if len(shoppingResults) != 1 || shoppingResults[0].(map[string]interface{})["product1"] != expectedProduct {
-		t.Errorf("unexpected shopping result: got %v want %v", shoppingResults[0].(map[string]interface{})["product1"], expectedProduct)
+	ProductReference := response.ProductReference
+	ExpectedFourthProduct := "product4"
+	if len(ProductReference) != 4 || ProductReference[3] != ExpectedFourthProduct {
+		t.Errorf("unexpected shopping result: got %v want %v", ProductReference[3], ExpectedFourthProduct)
 	}
 }
