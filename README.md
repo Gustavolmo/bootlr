@@ -46,3 +46,12 @@ Now off you go into the clouds!
 ```bash
 encore test ./...
 ```
+
+## To continue exploring Encore, check out one of these topics:
+
+  - Defining APIs and Services:	 https://encore.dev/docs/primitives/services-and-apis
+  - Using SQL databases:  		 https://encore.dev/docs/develop/databases
+  - Authenticating users: 		 https://encore.dev/docs/develop/auth
+  - Building a Slack bot: 		 https://encore.dev/docs/tutorials/slack-bot
+  - Building a REST API:  		 https://encore.dev/docs/tutorials/rest-api
+  - Building an Event-Driven app:  https://encore.dev/docs/tutorials/uptime

@@ -1,2 +1,4 @@
 encore.dev v1.34.3 h1:jO+8jBqq5/MShiRHSRGPBuTq003YR6KnnspgD+fkMBg=
 encore.dev v1.34.3/go.mod h1:XdWK6bKKAVzutmOKpC5qzalDQJLNfRCF/YCgA7OUZ3E=
+github.com/serpapi/google-search-results-golang v0.0.0-20240325113416-ec93f510648e h1:pBW1bjkGQGBdbT7a4IKq4W3H2apMQ7qvf+E/Ng5/0DY=
+github.com/serpapi/google-search-results-golang v0.0.0-20240325113416-ec93f510648e/go.mod h1:B4KcaaGbSpn3vq3FxSCsEJrBirStags89KTusB2of58=
