@@ -98,8 +98,6 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 			Response_format: Response_format{ Type : "json_object"},
 	}
 
-	fmt.Println("CHAT RESPONSE DATA ----> ", openAiRequestBody)
-
 	openAiRequestBodyBytes, err := json.Marshal(openAiRequestBody)
 	if err != nil {
 			return "", err
@@ -125,8 +123,6 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println("CHAT RESPONSE DATA ----> ", string(responseData))
 	
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(responseData, &openAIResponse); err != nil {
