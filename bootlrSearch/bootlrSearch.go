@@ -6,9 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"encore.app/utils"
 	g "github.com/serpapi/google-search-results-golang"
 )
+
+var secrets struct {
+	OPENAI_KEY string
+	OPENAI_ORG string
+	SERPAPI_KEY string
+}
 
 type MessageHistoryItem struct {
 	Role    string `json:"role"`
@@ -87,8 +92,8 @@ func RetreiveSearchRequestBody(write http.ResponseWriter, req *http.Request) ([]
 }
 
 func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string, error) {
-	OPENAI_KEY := utils.Secrets.OPENAI_KEY
-	OPENAI_ORG := utils.Secrets.OPENAI_ORG
+	OPENAI_KEY := secrets.OPENAI_KEY
+	OPENAI_ORG := secrets.OPENAI_ORG
 	OPENAI_URL := "https://api.openai.com/v1/chat/completions"
 
 	openAiRequestBody := OpenAIRequest{
@@ -132,7 +137,7 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 }
 
 func GetShoppingResults(query string) ([]interface{}, error) {
-	SERPAPI_KEY := utils.Secrets.SERPAPI_KEY
+	SERPAPI_KEY := secrets.SERPAPI_KEY
 
 	parameter := map[string]string{
     "engine": "google_shopping",
