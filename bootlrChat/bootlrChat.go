@@ -1,4 +1,3 @@
-// Service hello implements a simple hello world REST API.
 package bootlrChat
 
 import (
