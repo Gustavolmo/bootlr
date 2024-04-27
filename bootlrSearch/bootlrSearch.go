@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"encore.app/utils"
 	g "github.com/serpapi/google-search-results-golang"
 )
 
@@ -87,10 +88,8 @@ func RetreiveSearchRequestBody(write http.ResponseWriter, req *http.Request) ([]
 }
 
 func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string, error) {
-	OPENAI_KEY := "sk-proj-MgSnKksmqsDzfH2VveYDT3BlbkFJznlBiHksoFrrvpYP8w2T"
-	OPENAI_ORG := "org-3msMIuuSM8qkFWGPPwd8Dm1t"
-	/* OPENAI_KEY := service.GetEnvVariable("OPENAI_KEY")
-	OPENAI_ORG := service.GetEnvVariable("OPENAI_ORG") */
+	OPENAI_KEY := utils.Secrets.OPENAI_KEY
+	OPENAI_ORG := utils.Secrets.OPENAI_ORG
 	OPENAI_URL := "https://api.openai.com/v1/chat/completions"
 
 	openAiRequestBody := OpenAIRequest{
@@ -134,8 +133,8 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 }
 
 func GetShoppingResults(query string) ([]interface{}, error) {
-	SERPAPI_KEY := "276ae7bd9d0e0adeda5d91a561158a3b1bbc7054a6831397be3ab5a76433d711"
-	/* SERPAPI_KEY := service.GetEnvVariable("SERPAPI_KEY") */
+	SERPAPI_KEY := utils.Secrets.SERPAPI_KEY
+
 	parameter := map[string]string{
     "engine": "google_shopping",
     "q": query,

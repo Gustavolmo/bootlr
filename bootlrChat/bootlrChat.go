@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"encore.app/utils"
 )
 
 type ChatResponse struct {
@@ -78,10 +79,8 @@ func RetreiveChatRequestBody(write http.ResponseWriter, req *http.Request) ([]Me
 }
 
 func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
-	OPENAI_KEY := "sk-proj-MgSnKksmqsDzfH2VveYDT3BlbkFJznlBiHksoFrrvpYP8w2T"
-	OPENAI_ORG := "org-3msMIuuSM8qkFWGPPwd8Dm1t"
-/* 	OPENAI_KEY := service.GetEnvVariable("OPENAI_KEY")
-	OPENAI_ORG := service.GetEnvVariable("OPENAI_ORG") */
+	OPENAI_KEY := utils.Secrets.OPENAI_KEY
+	OPENAI_ORG := utils.Secrets.OPENAI_ORG
 	OPENAI_URL := "https://api.openai.com/v1/chat/completions"
 
 	openAiRequestBody := OpenAIRequest{
