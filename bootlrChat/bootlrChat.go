@@ -6,8 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"encore.app/utils"
 )
+
+var secrets struct {
+	OPENAI_KEY string
+	OPENAI_ORG string
+}
 
 type ChatResponse struct {
 	ResponseText     string   `json:"responseText"`
@@ -78,8 +82,8 @@ func RetreiveChatRequestBody(write http.ResponseWriter, req *http.Request) ([]Me
 }
 
 func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
-	OPENAI_KEY := utils.Secrets.OPENAI_KEY
-	OPENAI_ORG := utils.Secrets.OPENAI_ORG
+	OPENAI_KEY := secrets.OPENAI_KEY
+	OPENAI_ORG := secrets.OPENAI_ORG
 	OPENAI_URL := "https://api.openai.com/v1/chat/completions"
 
 	openAiRequestBody := OpenAIRequest{
@@ -108,10 +112,14 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	}
 	defer response.Body.Close()
 
+	
 	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}
+
+	fmt.Println("CHAT RESPONSE DATA ----> ", string(responseData))
+	fmt.Println("SECRET EXISTS? ----> ", secrets.OPENAI_KEY)
 	
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(responseData, &openAIResponse); err != nil {
