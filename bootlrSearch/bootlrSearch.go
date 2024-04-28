@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	g "github.com/serpapi/google-search-results-golang"
 )
 
@@ -13,6 +14,7 @@ var secrets struct {
 	OPENAI_KEY string
 	OPENAI_ORG string
 	SERPAPI_KEY string
+	IPLOCATIONAPI_KEY string
 }
 
 type MessageHistoryItem struct {
@@ -53,7 +55,18 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	shoppingResults, err := GetShoppingResults(searchQuery)
+	reqLocation, err := getRequestLocation(req)
+	if err != nil {
+		http.Error(write, "Error getting location results: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var defaultLocation = "SE"
+	if (reqLocation == "") {
+		reqLocation = defaultLocation
+	}
+
+	shoppingResults, err := GetShoppingResults(searchQuery, reqLocation)
 	if err != nil {
 		http.Error(write, "Error getting shopping results: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -136,13 +149,14 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	return searchQuery, nil
 }
 
-func GetShoppingResults(query string) ([]interface{}, error) {
+func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
 	SERPAPI_KEY := secrets.SERPAPI_KEY
 
 	parameter := map[string]string{
     "engine": "google_shopping",
     "q": query,
     "api_key": SERPAPI_KEY,
+		"gl": reqLocation,
   }
 
 	search := g.NewGoogleSearch(parameter, SERPAPI_KEY)
@@ -152,4 +166,35 @@ func GetShoppingResults(query string) ([]interface{}, error) {
 	}
   shoppingResults := results["shopping_results"].([]interface{})
 	return shoppingResults, nil
+}
+
+func getRequestLocation(req *http.Request) (string, error){
+	IPLOCATIONAPI_KEY := secrets.IPLOCATIONAPI_KEY
+
+	ip := strings.Split(req.RemoteAddr, ":")[0]
+	ipGeoLocationUrl := fmt.Sprintf("https://api.ipgeolocation.io/ipgeo?apiKey=%s&ip=%s", IPLOCATIONAPI_KEY, ip)
+
+	geoReq, err := http.NewRequest("GET", ipGeoLocationUrl, nil)
+	if err != nil {
+		return "", err
+	}
+
+	geoResponse, err := http.DefaultClient.Do(geoReq)
+	if err != nil {
+		return "", err
+	}
+	defer geoResponse.Body.Close()
+	
+	var geoData map[string]interface{}
+	err = json.NewDecoder(geoResponse.Body).Decode(&geoData)
+	if err != nil {
+		return "", err
+	}
+
+	countryCode, ok := geoData["country_code2"].(string)
+	if !ok {
+		return "", nil
+	}
+
+	return countryCode, nil
 }
