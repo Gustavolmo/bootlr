@@ -61,11 +61,6 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var defaultLocation = "SE"
-	if (reqLocation == "") {
-		reqLocation = defaultLocation
-	}
-
 	shoppingResults, err := GetShoppingResults(searchQuery, reqLocation)
 	if err != nil {
 		http.Error(write, "Error getting shopping results: "+err.Error(), http.StatusInternalServerError)
@@ -151,6 +146,11 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 
 func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
 	SERPAPI_KEY := secrets.SERPAPI_KEY
+
+	var defaultLocation = "SE"
+	if (reqLocation == "") {
+		reqLocation = defaultLocation
+	}
 
 	parameter := map[string]string{
     "engine": "google_shopping",
