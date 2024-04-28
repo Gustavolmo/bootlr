@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	/* "strings" */
 	g "github.com/serpapi/google-search-results-golang"
 )
 
@@ -55,13 +55,13 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	reqLocation, err := getRequestLocation(req)
+	/* reqLocation, err := getRequestLocation(req)
 	if err != nil {
 		http.Error(write, "Error getting location results: "+err.Error(), http.StatusInternalServerError)
 		return
-	}
+	} */
 
-	shoppingResults, err := GetShoppingResults(searchQuery, reqLocation)
+	shoppingResults, err := GetShoppingResults(searchQuery/* , reqLocation */)
 	if err != nil {
 		http.Error(write, "Error getting shopping results: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -144,19 +144,14 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	return searchQuery, nil
 }
 
-func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
+func GetShoppingResults(query string/* , reqLocation string */) ([]interface{}, error) {
 	SERPAPI_KEY := secrets.SERPAPI_KEY
-
-	var defaultLocation = "SE"
-	if (reqLocation == "") {
-		reqLocation = defaultLocation
-	}
 
 	parameter := map[string]string{
     "engine": "google_shopping",
     "q": query,
     "api_key": SERPAPI_KEY,
-		"gl": reqLocation,
+		"gl": "SE",
   }
 
 	search := g.NewGoogleSearch(parameter, SERPAPI_KEY)
@@ -168,7 +163,7 @@ func GetShoppingResults(query string, reqLocation string) ([]interface{}, error)
 	return shoppingResults, nil
 }
 
-func getRequestLocation(req *http.Request) (string, error){
+/* func getRequestLocation(req *http.Request) (string, error){
 	IPLOCATIONAPI_KEY := secrets.IPLOCATIONAPI_KEY
 
 	ip := strings.Split(req.RemoteAddr, ":")[0]
@@ -197,4 +192,4 @@ func getRequestLocation(req *http.Request) (string, error){
 	}
 
 	return countryCode, nil
-}
+} */
