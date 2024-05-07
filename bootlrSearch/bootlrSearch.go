@@ -18,21 +18,10 @@ var secrets struct {
 	SERPAPI_KEY string
 }
 
-type GeoInfo struct {
-	Query       string  `json:"query"`
-	Status      string  `json:"status"`
-	Country     string  `json:"country"`
-	CountryCode string  `json:"countryCode"`
-	Region      string  `json:"region"`
-	RegionName  string  `json:"regionName"`
-	City        string  `json:"city"`
-	Zip         string  `json:"zip"`
-	Lat         float64 `json:"lat"`
-	Lon         float64 `json:"lon"`
-	Timezone    string  `json:"timezone"`
-	ISP         string  `json:"isp"`
-	Org         string  `json:"org"`
-	AS          string  `json:"as"`
+type GeoData struct {
+	Country struct {
+		ISOCode string `json:"iso_code"`
+	} `json:"country"`
 }
 
 type MessageHistoryItem struct {
@@ -73,8 +62,10 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	reqLocation := getRequestCountryCode(req)
-
+	reqLocation, err := getRequestCountryCode(req)
+	if err != nil {
+		reqLocation = "UK"
+	}
 
 	shoppingResults, err := GetShoppingResults(searchQuery, reqLocation)
 	if err != nil {
@@ -159,7 +150,7 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	return searchQuery, nil
 }
 
-func getRequestCountryCode(req *http.Request) string {
+func getRequestCountryCode(req *http.Request) (string, error) {
 	ip := req.Header.Get("Cf-Connecting-Ip")
 	ip = strings.Split(ip, ":")[0]
 	
@@ -173,26 +164,25 @@ func getRequestCountryCode(req *http.Request) string {
 		ip = strings.Split(ip, ":")[0]
 	}
 
-	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
+	url := fmt.Sprintf("https://api.findip.net/%s/?token=6bad0e5471f8429a9028ef23448e6e02", ip)
 
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println("Error getting geo info:", err)
-		return "UK"
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	var geoInfo GeoInfo
-	if err := json.NewDecoder(resp.Body).Decode(&geoInfo); err != nil {
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
 		fmt.Println("Error decoding geo info:", err)
-		return "UK"
+		return "", err
 	}
 
-	if (geoInfo.CountryCode == "") {
-		return "UK"
-	}
+	var geoData GeoData
+	json.Unmarshal(body, &geoData)
 
-	return geoInfo.CountryCode
+	return geoData.Country.ISOCode, nil
 }
 
 func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
