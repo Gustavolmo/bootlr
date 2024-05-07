@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	/* "strings" */
+	"strings"
+
+	/* 	"github.com/oschwald/maxminddb-golang" */
 	g "github.com/serpapi/google-search-results-golang"
 )
 
@@ -14,7 +16,12 @@ var secrets struct {
 	OPENAI_KEY string
 	OPENAI_ORG string
 	SERPAPI_KEY string
-	IPLOCATIONAPI_KEY string
+}
+
+type GeoData struct {
+	Country struct {
+		ISOCode string `json:"iso_code"`
+	} `json:"country"`
 }
 
 type MessageHistoryItem struct {
@@ -55,13 +62,12 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	/* reqLocation, err := getRequestLocation(req)
+	reqLocation, err := getRequestCountryCode(req)
 	if err != nil {
-		http.Error(write, "Error getting location results: "+err.Error(), http.StatusInternalServerError)
-		return
-	} */
+		reqLocation = "UK"
+	}
 
-	shoppingResults, err := GetShoppingResults(searchQuery/* , reqLocation */)
+	shoppingResults, err := GetShoppingResults(searchQuery, reqLocation)
 	if err != nil {
 		http.Error(write, "Error getting shopping results: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -144,14 +150,49 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	return searchQuery, nil
 }
 
-func GetShoppingResults(query string/* , reqLocation string */) ([]interface{}, error) {
+func getRequestCountryCode(req *http.Request) (string, error) {
+	ip := req.Header.Get("Cf-Connecting-Ip")
+	ip = strings.Split(ip, ":")[0]
+	
+	if ip == "" {
+		ip = req.Header.Get("X-Forwarded-For")
+		ip = strings.Split(ip, ",")[0]
+	}
+
+	if ip == "" {
+		ip = req.RemoteAddr
+		ip = strings.Split(ip, ":")[0]
+	}
+
+	url := fmt.Sprintf("https://api.findip.net/%s/?token=6bad0e5471f8429a9028ef23448e6e02", ip)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error getting geo info:", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error decoding geo info:", err)
+		return "", err
+	}
+
+	var geoData GeoData
+	json.Unmarshal(body, &geoData)
+
+	return geoData.Country.ISOCode, nil
+}
+
+func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
 	SERPAPI_KEY := secrets.SERPAPI_KEY
 
 	parameter := map[string]string{
     "engine": "google_shopping",
     "q": query,
     "api_key": SERPAPI_KEY,
-		"gl": "SE",
+		"gl": reqLocation,
   }
 
 	search := g.NewGoogleSearch(parameter, SERPAPI_KEY)
@@ -162,34 +203,3 @@ func GetShoppingResults(query string/* , reqLocation string */) ([]interface{}, 
   shoppingResults := results["shopping_results"].([]interface{})
 	return shoppingResults, nil
 }
-
-/* func getRequestLocation(req *http.Request) (string, error){
-	IPLOCATIONAPI_KEY := secrets.IPLOCATIONAPI_KEY
-
-	ip := strings.Split(req.RemoteAddr, ":")[0]
-	ipGeoLocationUrl := fmt.Sprintf("https://api.ipgeolocation.io/ipgeo?apiKey=%s&ip=%s", IPLOCATIONAPI_KEY, ip)
-
-	geoReq, err := http.NewRequest("GET", ipGeoLocationUrl, nil)
-	if err != nil {
-		return "", err
-	}
-
-	geoResponse, err := http.DefaultClient.Do(geoReq)
-	if err != nil {
-		return "", err
-	}
-	defer geoResponse.Body.Close()
-	
-	var geoData map[string]interface{}
-	err = json.NewDecoder(geoResponse.Body).Decode(&geoData)
-	if err != nil {
-		return "", err
-	}
-
-	countryCode, ok := geoData["country_code2"].(string)
-	if !ok {
-		return "", nil
-	}
-
-	return countryCode, nil
-} */
