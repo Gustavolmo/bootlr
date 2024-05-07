@@ -152,7 +152,7 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 
 func getRequestCountryCode(req *http.Request) (string, error) {
 	ip := req.Header.Get("Cf-Connecting-Ip")
-	ip = strings.Split(ip, ":")[0]
+	ip = strings.Split(ip, ",")[0]
 	
 	if ip == "" {
 		ip = req.Header.Get("X-Forwarded-For")
@@ -161,7 +161,7 @@ func getRequestCountryCode(req *http.Request) (string, error) {
 
 	if ip == "" {
 		ip = req.RemoteAddr
-		ip = strings.Split(ip, ":")[0]
+		ip = strings.Split(ip, ",")[0]
 	}
 
 	url := fmt.Sprintf("https://api.findip.net/%s/?token=6bad0e5471f8429a9028ef23448e6e02", ip)
