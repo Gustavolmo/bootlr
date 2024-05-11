@@ -6,16 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
-
-	/* 	"github.com/oschwald/maxminddb-golang" */
-	g "github.com/serpapi/google-search-results-golang"
 )
 
 var secrets struct {
 	OPENAI_KEY string
 	OPENAI_ORG string
 	SERPAPI_KEY string
+	RAPIDAPI_KEY string
 }
 
 type GeoData struct {
@@ -62,16 +59,14 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	reqLocation, err := getRequestCountryCode(req)
-	if err != nil {
-		reqLocation = "UK"
-	}
-
-	shoppingResults, err := GetShoppingResults(searchQuery, reqLocation)
+	shoppingResults, err := GetShoppingResults(searchQuery, "se")
 	if err != nil {
 		http.Error(write, "Error getting shopping results: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// TODO: get as many amazon products as possible (up to 60, but 10 works) without throttling 429
+	// consider also a retry method if throttled to wait 1 second and try again up to 2 or 3 times
 
 	write.Header().Set("Content-Type", "application/json")
 	response := SearchResponse{
@@ -150,7 +145,39 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	return searchQuery, nil
 }
 
-func getRequestCountryCode(req *http.Request) (string, error) {
+func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
+	RAPIDAPI_KEY := secrets.RAPIDAPI_KEY
+	searchQuery := query
+
+	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=en", searchQuery)
+	
+	client := http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("X-RapidAPI-Key", RAPIDAPI_KEY)
+	req.Header.Add("X-RapidAPI-Host", "real-time-product-search.p.rapidapi.com")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	var response map[string]interface{}
+	json.Unmarshal(body, &response)
+	searchResults := response["data"].([]interface{})
+
+	return searchResults, nil
+}
+
+//================
+// PARKED SERVICES
+//================
+
+// TODO: ENABLE WHEN SEARCH PER LOCATION IS AVAILABLE
+/* func getRequestCountryCode(req *http.Request) (string, error) {
 	ip := req.Header.Get("Cf-Connecting-Ip")
 	ip = strings.Split(ip, ",")[0]
 	
@@ -183,23 +210,4 @@ func getRequestCountryCode(req *http.Request) (string, error) {
 	json.Unmarshal(body, &geoData)
 
 	return geoData.Country.ISOCode, nil
-}
-
-func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
-	SERPAPI_KEY := secrets.SERPAPI_KEY
-
-	parameter := map[string]string{
-    "engine": "google_shopping",
-    "q": query,
-    "api_key": SERPAPI_KEY,
-		"gl": reqLocation,
-  }
-
-	search := g.NewGoogleSearch(parameter, SERPAPI_KEY)
-  results, err := search.GetJSON()
-	if err != nil {
-		return nil, err
-	}
-  shoppingResults := results["shopping_results"].([]interface{})
-	return shoppingResults, nil
-}
+} */
