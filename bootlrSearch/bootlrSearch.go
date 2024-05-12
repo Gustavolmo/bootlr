@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"encore.dev/rlog"
 )
 
 var secrets struct {
@@ -138,6 +139,8 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	if err != nil {
 			return "", err
 	}
+
+	rlog.Info("BOOTLR SEARCH", "OpenAI responseData ==> ", string(responseData))
 
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(responseData, &openAIResponse); err != nil {

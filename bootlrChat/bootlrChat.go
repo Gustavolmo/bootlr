@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"encore.dev/rlog"
 )
 
 var secrets struct {
@@ -122,6 +124,8 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	rlog.Info("BOOTLR CHAT", "OpenAI responseData ==> ", string(responseData))
 	
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(responseData, &openAIResponse); err != nil {
@@ -131,6 +135,3 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	chatResponse :=  openAIResponse.Choices[0].Message.Content
 	return chatResponse, nil
 }
-
-// NOTE: example on how to debug error messages from third party apis
-// fmt.Println("OPENAI RES =====>", string(responseData))
