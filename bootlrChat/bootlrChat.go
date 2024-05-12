@@ -42,7 +42,6 @@ type OpenAIResponse struct {
     } `json:"choices"`
 }
 
-
 //encore:api public method=POST raw path=/bootlr-chat
 func BootlrChat(write http.ResponseWriter, req *http.Request){
 	chatHistory, err := RetreiveChatRequestBody(write, req)
@@ -133,3 +132,5 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	return chatResponse, nil
 }
 
+// NOTE: example on how to debug error messages from third party apis
+// fmt.Println("OPENAI RES =====>", string(responseData))
