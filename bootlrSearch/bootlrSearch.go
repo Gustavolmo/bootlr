@@ -11,7 +11,6 @@ import (
 var secrets struct {
 	OPENAI_KEY string
 	OPENAI_ORG string
-	SERPAPI_KEY string
 	RAPIDAPI_KEY string
 }
 
