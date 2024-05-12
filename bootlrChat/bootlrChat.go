@@ -122,7 +122,7 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	
 	var openAIResponse OpenAIResponse
 	if err := json.Unmarshal(responseData, &openAIResponse); err != nil {
 		return "", err

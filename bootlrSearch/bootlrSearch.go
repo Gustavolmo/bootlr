@@ -53,7 +53,8 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: Consider asking for keybaords when amazon is implemented in order to faciliate the serach on both apis
+	// TODO: Consider asking for keywords when amazon is implemented in order to faciliate the serach on both apis
+
 	searchQuery, err := TranslateMessagesToSearchQuery(messageHistory)
 	if err != nil {
 		http.Error(write, "Error translating message to search term: "+err.Error(), http.StatusInternalServerError)
@@ -69,7 +70,7 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 	// TODO: get as many amazon products as possible (up to 60, but 10 works) without throttling 429
 	// consider also a retry method if throttled to wait 1 second and try again up to 2 or 3 times
 
-	// TODO: Data translation service from amazon to rapid or vice versa
+	// TODO: Data translation service -> amazon to rapid struct or vice versa
 
 	write.Header().Set("Content-Type", "application/json")
 	response := SearchResponse{
@@ -151,8 +152,9 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
 	RAPIDAPI_KEY := secrets.RAPIDAPI_KEY
 	searchQuery := query
+	productsPerPage := "50"
 
-	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=en", searchQuery)
+	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=en&limit=%s", searchQuery, productsPerPage)
 	
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
