@@ -53,6 +53,7 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// TODO: Consider asking for keybaords when amazon is implemented in order to faciliate the serach on both apis
 	searchQuery, err := TranslateMessagesToSearchQuery(messageHistory)
 	if err != nil {
 		http.Error(write, "Error translating message to search term: "+err.Error(), http.StatusInternalServerError)
@@ -67,6 +68,8 @@ func BootlrSearch(write http.ResponseWriter, req *http.Request) {
 
 	// TODO: get as many amazon products as possible (up to 60, but 10 works) without throttling 429
 	// consider also a retry method if throttled to wait 1 second and try again up to 2 or 3 times
+
+	// TODO: Data translation service from amazon to rapid or vice versa
 
 	write.Header().Set("Content-Type", "application/json")
 	response := SearchResponse{
