@@ -156,7 +156,7 @@ func GetShoppingResults(query string, reqLocation string) ([]interface{}, error)
 	searchQuery := query
 	productsPerPage := "50"
 
-	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=en&limit=%s", searchQuery, productsPerPage)
+	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=sv&limit=%s", searchQuery, productsPerPage)
 	
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
@@ -170,7 +170,13 @@ func GetShoppingResults(query string, reqLocation string) ([]interface{}, error)
 	}
 
 	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	rlog.Info("BOOTLR SEARCH",
+		"RAPID BODY ==> ", string(body))
 
 	var response map[string]interface{}
 	json.Unmarshal(body, &response)
