@@ -154,9 +154,9 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 func GetShoppingResults(query string, reqLocation string) ([]interface{}, error) {
 	RAPIDAPI_KEY := secrets.RAPIDAPI_KEY
 	searchQuery := query
-	productsPerPage := "50"
+	productsPerPage := 50
 
-	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=sv&limit=%s", searchQuery, productsPerPage)
+	url := fmt.Sprintf("https://real-time-product-search.p.rapidapi.com/search?q=%s&country=se&language=sv&limit=%d", searchQuery, productsPerPage)
 	
 	client := http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
