@@ -39,7 +39,7 @@ func TranslateMessagesToSearchQuery(messageHistory []MessageHistoryItem) (string
 	OPENAI_URL := "https://api.openai.com/v1/chat/completions"
 
 	openAiRequestBody := OpenAIRequest{
-			Model:       "gpt-3.5-turbo",
+			Model:       "gpt-4o-mini",
 			Messages:    messageHistory,
 			Temperature: 1.2,
 	}
