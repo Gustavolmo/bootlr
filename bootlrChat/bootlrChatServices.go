@@ -40,7 +40,7 @@ func getAiChatResponse(messageHistory []MessageHistoryItem) (string, error) {
 	OPENAI_URL := "https://api.openai.com/v1/chat/completions"
 
 	openAiRequestBody := OpenAIRequest{
-			Model:       "gpt-3.5-turbo",
+			Model:       "gpt-4o-mini",
 			Messages:    messageHistory,
 			Temperature: 0.9,
 			Response_format: OpenaiResponseformat{ Type : "json_object"},
