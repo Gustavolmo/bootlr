@@ -109,7 +109,9 @@ func GetShoppingResults(query string, reqLocation string) ([]interface{}, error)
 
 	var response map[string]interface{}
 	json.Unmarshal(body, &response)
-	searchResults := response["data"].([]interface{})
+
+	data := response["data"].(map[string]interface{})
+	searchResults := data["products"].([]interface{})
 
 	return searchResults, nil
 }
